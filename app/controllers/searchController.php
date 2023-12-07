@@ -22,7 +22,9 @@
 		public function iniciarBuscadorControlador(){
 
 		    $url=$this->limpiarCadena($_POST['modulo_url']);
-			$texto=$this->limpiarCadena($_POST['txt_buscador']);
+			/* $texto=$this->limpiarCadena($_POST['txt_buscador']); */
+			$fechaDesde=$this->limpiarCadena($_POST['fechaDesde']);
+			$fechaHasta=$this->limpiarCadena($_POST['fechaHasta']);
 
 			if($this->modulosBusquedaControlador($url)){
 				$alerta=[
@@ -35,7 +37,7 @@
 		        exit();
 			}
 
-			if($texto==""){
+			if($fechaDesde==""||$fechaHasta==""){
 				$alerta=[
 					"tipo"=>"simple",
 					"titulo"=>"Ocurrió un error inesperado",
@@ -45,7 +47,7 @@
 				return json_encode($alerta);
 		        exit();
 			}
-
+/* 
 			if($this->verificarDatos("[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\- ]{1,30}",$texto)){
 				$alerta=[
 					"tipo"=>"simple",
@@ -55,9 +57,10 @@
 				];
 				return json_encode($alerta);
 		        exit();
-			}
+			} */
 
-			$_SESSION[$url]=$texto;
+			$_SESSION["fechaDesde"]=$fechaDesde;
+			$_SESSION["fechaHasta"]=$fechaHasta;
 
 			$alerta=[
 				"tipo"=>"redireccionar",
@@ -84,7 +87,8 @@
 		        exit();
 			}
 
-			unset($_SESSION[$url]);
+			unset($_SESSION["fechaDesde"]);
+			unset($_SESSION["fechaHasta"]);
 
 			$alerta=[
 				"tipo"=>"redireccionar",

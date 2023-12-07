@@ -11,7 +11,7 @@
 
 		$insVenta = new saleController();
 
-		echo $insVenta->listarVentaControlador($url[1],15,$url[0],"");
+		echo $insVenta->listarVentaControlador($url[1],15,$url[0],"","");
 
 		include "./app/views/inc/print_invoice_script.php";
 	?>

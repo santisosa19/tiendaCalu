@@ -36,14 +36,26 @@
 				$tabla='<div class="table-container mb-6"><table class="table is-striped is-narrow is-hoverable is-fullwidth"><tbody>';
 
 				foreach($datos_productos as $rows){
-					$tabla.='
-					<tr class="has-text-left" >
-                        <td><i class="fas fa-box fa-fw"></i> &nbsp; '.$rows['producto_nombre'].'</td>
-                        <td class="has-text-centered">
-                            <button type="button" class="button is-link is-rounded is-small" onclick="agregar_codigo(\''.$rows['producto_codigo'].'\')"><i class="fas fa-plus-circle"></i></button>
-                        </td>
-                    </tr>
-                    ';
+					if(is_file("./app/views/productos/".$rows['producto_foto'])){
+						$tabla.='
+						<tr class="has-text-left" >
+							<td><img class="is-photo" style="width:20%" src="'.APP_URL.'app/views/productos/'.$rows['producto_foto'].'"> &nbsp; '.$rows['producto_nombre'].'</td>
+							<td class="has-text-centered">
+								<button type="button" class="button is-link is-rounded is-small" onclick="agregar_codigo(\''.$rows['producto_codigo'].'\')"><i class="fas fa-plus-circle"></i></button>
+							</td>
+						</tr>
+						';
+					}else{
+						$tabla.='
+						<tr class="has-text-left" >
+							<td><img class="is-photo" style="width:20%" src="'.APP_URL.'app/views/productos/default.png"> &nbsp; '.$rows['producto_nombre'].'</td>
+							<td class="has-text-centered">
+								<button type="button" class="button is-link is-rounded is-small" onclick="agregar_codigo(\''.$rows['producto_codigo'].'\')"><i class="fas fa-plus-circle"></i></button>
+							</td>
+						</tr>
+						';
+					}
+					
 				}
 
 				$tabla.='</tbody></table></div>';
@@ -883,7 +895,7 @@
 
 
         /*----------  Controlador listar venta  ----------*/
-		public function listarVentaControlador($pagina,$registros,$url,$busqueda){
+		public function listarVentaControlador($pagina,$registros,$url,$desde,$hasta){
 
 			$pagina=$this->limpiarCadena($pagina);
 			$registros=$this->limpiarCadena($registros);
@@ -891,7 +903,8 @@
 			$url=$this->limpiarCadena($url);
 			$url=APP_URL.$url."/";
 
-			$busqueda=$this->limpiarCadena($busqueda);
+			$desde=$this->limpiarCadena($desde);
+			$hasta=$this->limpiarCadena($hasta);
 			$tabla="";
 
 			$pagina = (isset($pagina) && $pagina>0) ? (int) $pagina : 1;
@@ -899,17 +912,21 @@
 
 			$campos_tablas="venta.venta_id,venta.venta_codigo,venta.venta_fecha,venta.venta_hora,venta.venta_total,venta.usuario_id,venta.cliente_id,venta.caja_id,usuario.usuario_id,usuario.usuario_nombre,usuario.usuario_apellido,cliente.cliente_id,cliente.cliente_nombre,cliente.cliente_apellido";
 
-			if(isset($busqueda) && $busqueda!=""){
+			if(isset($hasta) && $hasta!=""&&isset($desde) && $desde!=""){
 
-				$consulta_datos="SELECT $campos_tablas FROM venta INNER JOIN cliente ON venta.cliente_id=cliente.cliente_id INNER JOIN usuario ON venta.usuario_id=usuario.usuario_id WHERE (venta.venta_codigo='$busqueda') ORDER BY venta.venta_id DESC LIMIT $inicio,$registros";
+				$consulta_datos="SELECT $campos_tablas FROM venta INNER JOIN cliente ON venta.cliente_id=cliente.cliente_id INNER JOIN usuario ON venta.usuario_id=usuario.usuario_id WHERE (venta.venta_fecha BETWEEN '$desde' AND '$hasta') ORDER BY venta.venta_id DESC LIMIT $inicio,$registros";
 
-				$consulta_total="SELECT COUNT(venta_id) FROM venta WHERE (venta.venta_codigo='$busqueda')";
+				$consulta_total="SELECT COUNT(venta_id) FROM venta WHERE (venta.venta_fecha BETWEEN '$desde' AND '$hasta')";
+
+				$consulta_total_precio="SELECT SUM(venta_total) FROM venta WHERE (venta.venta_fecha BETWEEN '$desde' AND '$hasta')";
 
 			}else{
 
 				$consulta_datos="SELECT $campos_tablas FROM venta INNER JOIN cliente ON venta.cliente_id=cliente.cliente_id INNER JOIN usuario ON venta.usuario_id=usuario.usuario_id ORDER BY venta.venta_id DESC LIMIT $inicio,$registros";
 
 				$consulta_total="SELECT COUNT(venta_id) FROM venta";
+
+				$consulta_total_precio="SELECT SUM(venta_total) FROM venta";
 
 			}
 
@@ -918,6 +935,9 @@
 
 			$total = $this->ejecutarConsulta($consulta_total);
 			$total = (int) $total->fetchColumn();
+
+			$totalVenta = $this->ejecutarConsulta($consulta_total_precio);
+			$totalVenta = (int) $totalVenta->fetchColumn();
 
 			$numeroPaginas =ceil($total/$registros);
 
@@ -1007,7 +1027,7 @@
 			### Paginacion ###
 			if($total>0 && $pagina<=$numeroPaginas){
 				$tabla.='<p class="has-text-right">Mostrando ventas <strong>'.$pag_inicio.'</strong> al <strong>'.$pag_final.'</strong> de un <strong>total de '.$total.'</strong></p>';
-
+				$tabla.='<h1 class="title has-text-centered">Total de ventas <strong>$	'.$totalVenta.'</strong><h1>';
 				$tabla.=$this->paginadorTablas($pagina,$numeroPaginas,$url,7);
 			}
 

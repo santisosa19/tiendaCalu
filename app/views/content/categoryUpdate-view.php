@@ -29,13 +29,7 @@
 					<label>Nombre <?php echo CAMPO_OBLIGATORIO; ?></label>
 				  	<input class="input" type="text" name="categoria_nombre" value="<?php echo $datos['categoria_nombre']; ?>" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]{4,50}" maxlength="50" required >
 				</div>
-		  	</div>
-		  	<div class="column">
-		    	<div class="control">
-					<label>Ubicación</label>
-				  	<input class="input" type="text" name="categoria_ubicacion" value="<?php echo $datos['categoria_ubicacion']; ?>" pattern="[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]{5,150}" maxlength="150" >
-				</div>
-		  	</div>
+		  	</div>	
 		</div>
 		<p class="has-text-centered">
 			<button type="submit" class="button is-success is-rounded"><i class="fas fa-sync-alt"></i> &nbsp; Actualizar</button>
